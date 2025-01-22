@@ -1,60 +1,23 @@
-import java.util.Objects;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
-class Flight {
-    private String flightNumber;
-    private String destination;
-    private int duration;
-    private String departureTime;
-
-    public Flight(String flightNumber, String destination, int duration, String departureTime) {
-        this.flightNumber = flightNumber;
-        this.destination = destination;
-        this.duration = duration;
-        this.departureTime = departureTime;
-    }
-
-    public String getFlightNumber() {
-        return flightNumber;
-    }
-
-    public String getDestination() {
-        return destination;
-    }
-
-    public int getDuration() {
-        return duration;
-    }
-
-    public String getDepartureTime() {
-        return departureTime;
-    }
-
-    public void displayFlightDetails() {
-        System.out.println("Flight Number: " + flightNumber);
-        System.out.println("Destination: " + destination);
-        System.out.println("Duration: " + duration + " mins");
-        System.out.println("Departure Time: " + departureTime);
-    }
-
-    @Override
-    public String toString() {
-        return "Flight [FlightNumber=" + flightNumber + ", Destination=" + destination +
-                ", Duration=" + duration + " mins, DepartureTime=" + departureTime + "]";
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Flight flight = (Flight) obj;
-        return duration == flight.duration &&
-                Objects.equals(flightNumber, flight.flightNumber) &&
-                Objects.equals(destination, flight.destination) &&
-                Objects.equals(departureTime, flight.departureTime);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(flightNumber, destination, duration, departureTime);
+public class Flight {
+    public static void displayAllFlights() {
+        String query = "SELECT * FROM flights";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet resultSet = statement.executeQuery()) {
+            System.out.println("\nAvailable Flights:");
+            while (resultSet.next()) {
+                System.out.printf("%d. %s to %s at %s%n",
+                        resultSet.getInt("id"),
+                        resultSet.getString("flight_number"),
+                        resultSet.getString("destination"),
+                        resultSet.getString("departure_time"));
+            }
+        } catch (Exception e) {
+            System.out.println("Error fetching flights: " + e.getMessage());
+        }
     }
 }
